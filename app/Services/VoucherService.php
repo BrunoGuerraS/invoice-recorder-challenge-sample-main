@@ -32,7 +32,7 @@ class VoucherService
             try {
                 $vouchers[]  = $this->storeVoucherFromXmlContent($xmlContent, $user);
                 $vouchersProcessed = $vouchers;
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $vouchersFailed[] = ['xml_content' => $xmlContent, 'error' => $e->getMessage()];
             }
         }
@@ -53,10 +53,8 @@ class VoucherService
         $receiverName = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')[0];
         $receiverDocumentType = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID')[0];
         $receiverDocumentNumber = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID')[0];
-
         $totalAmount = (string) $xml->xpath('//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount')[0];
 
-        //1er reto
         $serie = (string) explode('-', (string) $xml->xpath('//cbc:ID')[0])[0];
         $voucherNumber = (string) explode('-', (string) $xml->xpath('//cbc:ID')[0])[1];
         $voucherType = (string) $xml->xpath('//cbc:InvoiceTypeCode')[0];
@@ -100,12 +98,26 @@ class VoucherService
         return $voucherWithoutXmlContent;
     }
 
-    public function getTotalAmount(string $id): object
+    public function getTotalAmount(string $id)
     {
-        $voucher = Voucher::find($id);
-        $totalAmount = $voucher->total_amount;
-        return (object) [
-            'total_amount' => $totalAmount
-        ];
+        $result = Voucher::selectRaw('user_id')
+            ->selectRaw('SUM(CASE WHEN currency_type = "PEN" THEN total_amount ELSE 0 END) AS total_amount_sum_pen')
+            ->selectRaw('SUM(CASE WHEN currency_type = "USD" THEN total_amount ELSE 0 END) AS total_amount_sum_usd')
+            ->where('user_id', $id)
+            ->groupBy('user_id')
+            ->get();
+
+        return $result;
+    }
+
+    public function deleteVoucher(string $id)
+    {
+        try {
+            $voucher = Voucher::findOrFail($id);
+            $voucher->delete();
+            return 'Voucher deleted successfully.';
+        } catch (Exception $exception) {
+            return 'Voucher not found.';
+        }
     }
 }

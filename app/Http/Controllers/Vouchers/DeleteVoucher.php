@@ -7,15 +7,15 @@ use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class GetTotalAmount extends Controller
+class DeleteVoucher extends Controller
 {
     public function __construct(private readonly VoucherService $voucherService){}
     public function __invoke(Request $request): Response
     {
         try {
-            $totalAmount = $this->voucherService->getTotalAmount($request->id);
+            $this->voucherService->deleteVoucher($request->id);
             return response(
-                $totalAmount
+                'Voucher deleted'
             );
         } catch (\Exception $e) {
             return response([

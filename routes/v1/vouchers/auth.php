@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Vouchers\DeleteVoucher;
 use App\Http\Controllers\Vouchers\GetTotalAmount;
 use App\Http\Controllers\Vouchers\GetVouchersHandler;
 use App\Http\Controllers\Vouchers\StoreVouchersHandler;
@@ -11,7 +12,9 @@ Route::prefix('vouchers')->group(
 
         Route::post('/', StoreVouchersHandler::class);
 
-        //3ra parte
         Route::get('/amount/{id}', GetTotalAmount::class);
+
+        Route::delete('/{id}', DeleteVoucher::class);
+
     }
 );
