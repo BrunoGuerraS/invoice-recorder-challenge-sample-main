@@ -15,6 +15,7 @@ class VoucherService
     public function getVouchers(int $page, int $paginate): LengthAwarePaginator
     {
         return Voucher::with(['lines', 'user'])->paginate(perPage: $paginate, page: $page);
+
     }
 
     /**
@@ -98,6 +99,10 @@ class VoucherService
         return $voucherWithoutXmlContent;
     }
 
+    /**
+     * @param string $id
+     * @return mixed
+     */
     public function getTotalAmount(string $id)
     {
         $result = Voucher::selectRaw('user_id')
@@ -110,6 +115,10 @@ class VoucherService
         return $result;
     }
 
+    /**
+     * @param string $id
+     * @return string
+     */
     public function deleteVoucher(string $id)
     {
         try {
